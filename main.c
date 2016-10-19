@@ -1,22 +1,25 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "map.h"
 
 #define STRING_SIZE 2047
+#define CHAR_ARRAY_SIZE 127
 
-Map* map;
+long int charCount[CHAR_ARRAY_SIZE];
 FILE* arq;
 
-Map* insereCaracteres(char* s);
+
+//Map* insereCaracteres(char* s);
+long int* insereCaracteres(char* s);
+void merge(long int* a, long int* b);
+void print(long int* c);
 
 int main(int argc, char** argv)
 {
 	int i;
 	char aux[STRING_SIZE + 1];
 
-	map = (Map*) malloc(sizeof(Map));
-	initialize(map);
+	for (i = 0; i < CHAR_ARRAY_SIZE; i++) charCount[i] = 0;
 
 	if(argc < 2)
 	{
@@ -30,31 +33,63 @@ int main(int argc, char** argv)
       exit(-1);
   	}
 
-  	char buffer[128];
-	sprintf(buffer, "%%%dc", STRING_SIZE);
+	size_t n = 0;
+	long int* temp_l;
 	while(!feof(arq))
 	{
-		fscanf(arq, buffer, aux);
-		Map* temp_m = insereCaracteres(aux);
-		merge(map, temp_m);
-		strcpy(aux, "");
+		n = fread((void *)aux, 1, STRING_SIZE, arq);
+		if(n < STRING_SIZE) aux[n] = '\0';
+		temp_l = insereCaracteres(aux);
+		merge(charCount, temp_l);
 	}
 
 
 	printf("Caractere, Qtde\n");
-	print(map);
-
-	destroy(map);
+	print(charCount);
 
 	return 0;
 }
 
-Map* insereCaracteres(char* s)
-{
-	Map* map = (Map*) malloc(sizeof(Map));
-	initialize(map);
-	int i, size = strlen(s) - 1;
+long int* insereCaracteres(char* s)
+{	
+	long int* cnt = malloc(sizeof(long int) * CHAR_ARRAY_SIZE);
+	int i, size = strlen(s);
+	for (i = 0; i < CHAR_ARRAY_SIZE; i++) cnt[i] = 0;
 	for (i = 0; i < size; i++)
-		insert(map, s[i]);
-	return map;
+		if(s[i] >= 0 && s[i] < CHAR_ARRAY_SIZE) cnt[s[i]]++;
+	return cnt;
+}
+
+void merge(long int* a, long int* b)
+{
+	int i;
+	for(i = 0; i < CHAR_ARRAY_SIZE; i++)
+		a[i] += b[i];
+	free(b);
+}
+
+int checkChar(char c)
+{
+	if(c >= 'A' && c <= 'Z') return 1;
+	if(c >= 'a' && c <= 'z') return 1;
+	if(c >= '0' && c <= '9') return 1;
+	if(c == '?' || c == '!'
+		|| c == '.' || c == ','
+		|| c == ';' || c == ':'
+		|| c == '_' || c == '-'
+		|| c == '(' || c == ')'
+		|| c == '@' || c == '%'
+		|| c == '&' || c == '$'
+		|| c == '#') return 1;
+	return 0;
+}
+
+void print(long int* c)
+{
+	int i;
+	for (i = 0; i < CHAR_ARRAY_SIZE; i++)
+	{
+		if(checkChar(i) && c[i] > 0) printf("%c, %ld\n", i, c[i]);
+	}
+	printf("\n");
 }

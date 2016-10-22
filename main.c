@@ -1,15 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <pthread.h>
+#include "timer.h"
 
-#define STRING_SIZE 2047
+#define STRING_SIZE 511
 #define CHAR_ARRAY_SIZE 127
 
 long int charCount[CHAR_ARRAY_SIZE];
 FILE* arq;
 
-
-//Map* insereCaracteres(char* s);
 long int* insereCaracteres(char* s);
 void merge(long int* a, long int* b);
 void print(long int* c);
@@ -18,6 +18,7 @@ int main(int argc, char** argv)
 {
 	int i;
 	char aux[STRING_SIZE + 1];
+	double start, end;
 
 	for (i = 0; i < CHAR_ARRAY_SIZE; i++) charCount[i] = 0;
 
@@ -33,6 +34,7 @@ int main(int argc, char** argv)
       exit(-1);
   	}
 
+  	GET_TIME(start);
 	size_t n = 0;
 	long int* temp_l;
 	while(!feof(arq))
@@ -42,10 +44,11 @@ int main(int argc, char** argv)
 		temp_l = insereCaracteres(aux);
 		merge(charCount, temp_l);
 	}
-
+	GET_TIME(end);
 
 	printf("Caractere, Qtde\n");
 	print(charCount);
+	printf("Tempo decorrido: %lf\n", end - start);
 
 	return 0;
 }

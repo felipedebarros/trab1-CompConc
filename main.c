@@ -8,11 +8,11 @@
 #define CHAR_ARRAY_SIZE 127
 
 long int charCount[CHAR_ARRAY_SIZE];
-FILE* arq;
+FILE *arq, *arqSaida;
 
-long int* insereCaracteres(char* s);
+void insereCaracteres(long int* cnt, char* s);
 void merge(long int* a, long int* b);
-void print(long int* c);
+void print(long int* c, FILE* arq);
 
 int main(int argc, char** argv)
 {
@@ -22,9 +22,9 @@ int main(int argc, char** argv)
 
 	for (i = 0; i < CHAR_ARRAY_SIZE; i++) charCount[i] = 0;
 
-	if(argc < 2)
+	if(argc < 3)
 	{
-		printf("Entrada deve ser da forma <arquivo de entrada>.txt\n");
+		printf("Entrada deve ser da forma <arquivo de entrada>.txt <arquivo de saida>.txt\n");
 		exit(-1);
 	}
 
@@ -34,33 +34,37 @@ int main(int argc, char** argv)
       exit(-1);
   	}
 
+  	arqSaida = fopen(argv[2], "w");
+	if(arqSaida == NULL) {
+      fprintf(stderr, "Erro ao abrir o arquivo de saida.\n");
+      exit(-1);
+  	}
+
   	GET_TIME(start);
 	size_t n = 0;
-	long int* temp_l;
 	while(!feof(arq))
 	{
 		n = fread((void *)aux, 1, STRING_SIZE, arq);
 		if(n < STRING_SIZE) aux[n] = '\0';
-		temp_l = insereCaracteres(aux);
-		merge(charCount, temp_l);
+		insereCaracteres(charCount, aux);
 	}
 	GET_TIME(end);
 
-	printf("Caractere, Qtde\n");
-	print(charCount);
+	fprintf(arqSaida, "Caractere, Qtde\n");
+	print(charCount, arqSaida);
 	printf("Tempo decorrido: %lf\n", end - start);
+
+	fclose(arq);
+	fclose(arqSaida);
 
 	return 0;
 }
 
-long int* insereCaracteres(char* s)
+void insereCaracteres(long int* cnt, char* s)
 {	
-	long int* cnt = malloc(sizeof(long int) * CHAR_ARRAY_SIZE);
 	int i, size = strlen(s);
-	for (i = 0; i < CHAR_ARRAY_SIZE; i++) cnt[i] = 0;
 	for (i = 0; i < size; i++)
 		if(s[i] >= 0 && s[i] < CHAR_ARRAY_SIZE) cnt[s[i]]++;
-	return cnt;
 }
 
 void merge(long int* a, long int* b)
@@ -87,12 +91,11 @@ int checkChar(char c)
 	return 0;
 }
 
-void print(long int* c)
+void print(long int* c, FILE* arq)
 {
 	int i;
 	for (i = 0; i < CHAR_ARRAY_SIZE; i++)
 	{
-		if(checkChar(i) && c[i] > 0) printf("%c, %ld\n", i, c[i]);
+		if(checkChar(i) && c[i] > 0) fprintf(arq, "%c, %ld\n", i, c[i]);
 	}
-	printf("\n");
 }

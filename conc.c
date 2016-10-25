@@ -7,14 +7,14 @@
 #define STRING_SIZE 1023
 #define CHAR_ARRAY_SIZE 127
 
-FILE* arq;
+FILE *arq, *arqSaida;
 int nThreads;
 
 pthread_mutex_t arq_mutex;
 
 void insereCaracteres(long int* cnt, char* s);
 void merge(long int* a, long int* b);
-void print(long int* c);
+void print(long int* c, FILE* arq);
 
 void* ContaChar(void* arg)
 {
@@ -44,9 +44,9 @@ int main(int argc, char** argv)
 
     for (i = 0; i < CHAR_ARRAY_SIZE; i++) charCount[i] = 0;
 
-    if(argc < 3)
+    if(argc < 4)
     {
-        printf("Entrada deve ser da forma <arquivo de entrada>.txt <numero de threads>\n");
+        printf("Entrada deve ser da forma <arquivo de entrada>.txt <arquivo de saida>.txt <numero de threads>\n");
         exit(-1);
     }
 
@@ -55,8 +55,14 @@ int main(int argc, char** argv)
       fprintf(stderr, "Erro ao abrir o arquivo de entrada.\n");
       exit(-1);
     }
+
+    arqSaida = fopen(argv[2], "w");
+    if(arqSaida == NULL) {
+      fprintf(stderr, "Erro ao abrir o arquivo de saida.\n");
+      exit(-1);
+    }
     
-    nThreads = atoi(argv[2]);
+    nThreads = atoi(argv[3]);
     system_id = malloc(sizeof(pthread_t) * nThreads);
     
     GET_TIME(start);
@@ -83,8 +89,11 @@ int main(int argc, char** argv)
     GET_TIME(end);
 
     printf("Caractere, Qtde\n");
-    print(charCount);
+    print(charCount, arqSaida);
     printf("Tempo decorrido %lf\n", end - start);
+
+    fclose(arq);
+    fclose(arqSaida);
 
     pthread_exit(NULL);
 }
@@ -119,12 +128,11 @@ int checkChar(char c)
     return 0;
 }
 
-void print(long int* c)
+void print(long int* c, FILE* arq)
 {
     int i;
     for (i = 0; i < CHAR_ARRAY_SIZE; i++)
     {
-        if(checkChar(i) && c[i] > 0) printf("%c, %ld\n", i, c[i]);
+        if(checkChar(i) && c[i] > 0) fprintf(arq, "%c, %ld\n", i, c[i]);
     }
-    printf("\n");
 }

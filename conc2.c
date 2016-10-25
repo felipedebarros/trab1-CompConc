@@ -127,6 +127,8 @@ int main(int argc, char** argv)
     long int charCount[CHAR_ARRAY_SIZE];
     double start, end;
 
+    GET_TIME(start);
+
     for (i = 0; i < CHAR_ARRAY_SIZE; i++) charCount[i] = 0;
 
     if(argc < 4)
@@ -149,9 +151,7 @@ int main(int argc, char** argv)
     
     nThreads = atoi(argv[3]) + 1;
     system_id = malloc(sizeof(pthread_t) * nThreads);
-    
-    GET_TIME(start);
-
+   
     pthread_mutex_init(&mutex, NULL);
     pthread_cond_init(&cond_prod, NULL);
     pthread_cond_init(&cond_cons, NULL);
@@ -186,14 +186,14 @@ int main(int argc, char** argv)
     pthread_cond_destroy(&cond_cons);
     pthread_cond_destroy(&cond_prod);
 
-    GET_TIME(end);
-
-    printf("Caractere, Qtde\n");
+    fprintf(arqSaida ,"Caractere, Qtde\n");
     print(charCount, arqSaida);
-    printf("Tempo decorrido %lf\n", end - start);
 
     fclose(arq);
     fclose(arqSaida);
+
+    GET_TIME(end);
+    printf("Tempo decorrido %lf\n", end - start);
 
     pthread_exit(NULL);
 }

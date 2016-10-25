@@ -20,6 +20,8 @@ int main(int argc, char** argv)
 	char aux[STRING_SIZE + 1];
 	double start, end;
 
+  	GET_TIME(start);
+
 	for (i = 0; i < CHAR_ARRAY_SIZE; i++) charCount[i] = 0;
 
 	if(argc < 3)
@@ -40,7 +42,6 @@ int main(int argc, char** argv)
       exit(-1);
   	}
 
-  	GET_TIME(start);
 	size_t n = 0;
 	while(!feof(arq))
 	{
@@ -48,14 +49,15 @@ int main(int argc, char** argv)
 		if(n < STRING_SIZE) aux[n] = '\0';
 		insereCaracteres(charCount, aux);
 	}
-	GET_TIME(end);
 
 	fprintf(arqSaida, "Caractere, Qtde\n");
 	print(charCount, arqSaida);
-	printf("Tempo decorrido: %lf\n", end - start);
 
 	fclose(arq);
 	fclose(arqSaida);
+
+	GET_TIME(end);
+	printf("Tempo decorrido: %lf\n", end - start);
 
 	return 0;
 }

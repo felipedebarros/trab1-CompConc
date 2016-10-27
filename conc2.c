@@ -4,7 +4,7 @@
 #include <pthread.h>
 #include "timer.h"
 
-#define STRING_SIZE 2047
+#define STRING_SIZE 1048575
 #define CHAR_ARRAY_SIZE 127
 #define N 5
 #define DEBUG 0
@@ -200,9 +200,12 @@ int main(int argc, char** argv)
 
 void insereCaracteres(long int* cnt, char* s)
 {   
-    int i, size = strlen(s);
-    for (i = 0; i < size; i++)
+    int i;
+    for (i = 0; i < STRING_SIZE; i++)
+    {
+    	if(s[i] == '\0') break;
         if(s[i] >= 0 && s[i] < CHAR_ARRAY_SIZE) cnt[s[i]]++;
+    }
 }
 
 void merge(long int* a, long int* b)

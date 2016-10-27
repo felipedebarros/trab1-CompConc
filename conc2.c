@@ -28,6 +28,10 @@ char* retiraBuffer(int n);
 void* ProduzBloco(void* arg)
 {
     size_t n = 0;
+
+	double readStart, readEnd;
+    GET_TIME(readStart);
+
     while(!feof(arq))
     {
         char* aux = (char*) malloc(sizeof(char) * (STRING_SIZE + 1));
@@ -35,6 +39,10 @@ void* ProduzBloco(void* arg)
         if(n < STRING_SIZE) aux[n] = '\0';
         insereBuffer(aux);
     }
+
+    GET_TIME(readEnd);
+
+    printf("Tempo de leitura: %lf\n", readEnd - readStart);
 
     pthread_mutex_lock(&mutex);
     fimDeArquivo = 1;
@@ -126,6 +134,8 @@ int main(int argc, char** argv)
     pthread_t* system_id;
     long int charCount[CHAR_ARRAY_SIZE];
     double start, end;
+    double procStart, procEnd;
+    double printStart, printEnd;
 
     GET_TIME(start);
 
@@ -158,6 +168,8 @@ int main(int argc, char** argv)
 
     if(pthread_create(&system_id[0], NULL, ProduzBloco, NULL))
         { printf("Erro pthread_create"); exit(-1);}
+
+    GET_TIME(procStart);
     for(i = 1; i < nThreads; i++)
     {
         arg = malloc(sizeof(int));
@@ -178,7 +190,8 @@ int main(int argc, char** argv)
         { printf("Erro pthread_join"); exit(-1);}
         merge(charCount, ret);
     }
-
+    GET_TIME(procEnd);
+    printf("Tempo de processamento: %lf\n", procEnd - procStart);
 
     if(DEBUG) printf("dei join (consumidoras)\n");
 
@@ -186,14 +199,18 @@ int main(int argc, char** argv)
     pthread_cond_destroy(&cond_cons);
     pthread_cond_destroy(&cond_prod);
 
+    GET_TIME(printStart);
     fprintf(arqSaida ,"Caractere, Qtde\n");
     print(charCount, arqSaida);
+    GET_TIME(printEnd);
+
+    printf("Tempo de escrita: %lf\n", printEnd - printStart);
 
     fclose(arq);
     fclose(arqSaida);
 
     GET_TIME(end);
-    printf("Tempo decorrido %lf\n", end - start);
+    printf("Tempo total decorrido: %lf\n", end - start);
 
     pthread_exit(NULL);
 }
